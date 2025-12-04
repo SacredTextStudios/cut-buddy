@@ -742,7 +742,7 @@
                             </button>
                         ` : ''}
                         ${request.status === 'in-progress' ? `
-                            <button class="btn-action btn-complete" onclick="completeRequest('${request.id}', '${request.thickness}', '${request.color}', ${request.quantity})">
+                            <button class="btn-action btn-complete" onclick="completeRequest('${request.id}')">
                                 Mark Complete
                             </button>
                         ` : ''}
@@ -760,14 +760,25 @@
             }
         };
 
-        window.completeRequest = async function(requestId, thickness, color, quantity) {
+        window.completeRequest = async function(requestId) {
             if (!confirm('Mark this cut as complete? This will deduct sheets from inventory.')) {
                 return;
             }
 
             try {
-                // Update request status
+                // Get the request data
                 const requestRef = ref(database, `cutRequests/${requestId}`);
+                const requestSnapshot = await get(requestRef);
+                const request = requestSnapshot.val();
+                
+                if (!request) {
+                    alert('Request not found');
+                    return;
+                }
+
+                const { thickness, color, quantity } = request;
+
+                // Update request status
                 await update(requestRef, { status: 'completed' });
 
                 // Deduct from inventory
