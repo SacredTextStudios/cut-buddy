@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cut Request App</title>
+    <title>Cut Request & Inventory App</title>
     <style>
         * {
             margin: 0;
@@ -30,10 +30,12 @@
             padding: 10px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
         }
 
         .tab {
             flex: 1;
+            min-width: 150px;
             padding: 15px;
             border: none;
             background: #f0f0f0;
@@ -64,6 +66,12 @@
         h1 {
             font-size: 28px;
             margin-bottom: 25px;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 20px 0 15px 0;
             color: #333;
         }
 
@@ -141,14 +149,22 @@
             cursor: not-allowed;
         }
 
+        .btn-secondary {
+            background: #007AFF;
+            color: white;
+            padding: 12px 20px;
+        }
+
         .filter-bar {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .filter-btn {
             flex: 1;
+            min-width: 120px;
             padding: 10px;
             border: none;
             background: #f0f0f0;
@@ -246,14 +262,6 @@
             line-height: 1.5;
         }
 
-        .attached-image {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -285,32 +293,135 @@
             font-size: 16px;
         }
 
-        .image-preview {
-            width: 100%;
-            max-height: 200px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-top: 10px;
+        /* Inventory Styles */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        #imageInput {
-            display: none;
+        .inventory-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #007AFF;
         }
 
-        .image-upload-btn {
-            background: #007AFF;
+        .inventory-card.low-stock {
+            border-left-color: #FF3B30;
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .inventory-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stock-count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #007AFF;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .stock-count.low {
+            color: #FF3B30;
+        }
+
+        .stock-label {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            background: #FF3B30;
             color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .inventory-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
             border: none;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            width: 100%;
+            transition: all 0.3s;
         }
 
-        .image-upload-btn:hover {
-            background: #0066CC;
+        .btn-add {
+            background: #34C759;
+            color: white;
+        }
+
+        .btn-remove {
+            background: #FF3B30;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #8E8E93;
+            color: white;
         }
     </style>
 </head>
@@ -319,6 +430,7 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('requester')">📝 New Request</button>
             <button class="tab" onclick="switchTab('cutter')">📋 Cut Queue</button>
+            <button class="tab" onclick="switchTab('inventory')">📦 Inventory</button>
         </div>
 
         <!-- Requester Tab -->
@@ -363,14 +475,6 @@
                 <textarea id="description" placeholder="Add notes or special instructions"></textarea>
             </div>
 
-            <div class="form-group">
-                <input type="file" id="imageInput" accept="image/*" capture="environment" onchange="handleImageSelect(event)">
-                <button class="image-upload-btn" onclick="document.getElementById('imageInput').click()">
-                    📷 Add Photo (Optional)
-                </button>
-                <img id="imagePreview" class="image-preview" style="display: none;">
-            </div>
-
             <button class="btn btn-primary" onclick="submitRequest()">Submit Request</button>
         </div>
 
@@ -388,12 +492,39 @@
                 <div class="empty-state">Loading requests...</div>
             </div>
         </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory" class="tab-content">
+            <h1>Sheet Inventory</h1>
+            
+            <div id="inventory-grid" class="inventory-grid">
+                <div class="empty-state">Loading inventory...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adjust Inventory Modal -->
+    <div id="adjustModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Adjust Inventory</div>
+            <div id="modalMaterialName" style="font-size: 16px; color: #666; margin-bottom: 20px;"></div>
+            
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="adjustQuantity" value="1" min="1">
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-add" onclick="confirmAdjustment('add')">Add Sheets</button>
+                <button class="btn btn-remove" onclick="confirmAdjustment('remove')">Remove Sheets</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, push, set, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getDatabase, ref, push, set, onValue, update, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDtRfTmK88Sd8QCggQixk728TndsAPiy_U",
@@ -407,14 +538,46 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const storage = getStorage(app);
 
         // Global state
         let selectedThickness = '1/8"';
         let selectedColor = 'Black Satin';
-        let selectedImage = null;
         let currentFilter = 'pending';
         let allRequests = [];
+        let inventory = {};
+        let currentAdjustMaterial = null;
+
+        const LOW_STOCK_THRESHOLD = 10;
+
+        // Material combinations
+        const materials = [
+            { thickness: '1/8"', color: 'Black Satin' },
+            { thickness: '1/8"', color: 'Shay Gray' },
+            { thickness: '1/8"', color: 'Antelope' },
+            { thickness: '1/8"', color: 'Crescent White' },
+            { thickness: '3/8"', color: 'Black Satin' },
+            { thickness: '3/8"', color: 'Shay Gray' },
+            { thickness: '3/8"', color: 'Antelope' },
+            { thickness: '3/8"', color: 'Crescent White' }
+        ];
+
+        // Initialize inventory
+        async function initializeInventory() {
+            const inventoryRef = ref(database, 'inventory');
+            const snapshot = await get(inventoryRef);
+            
+            if (!snapshot.exists()) {
+                // Set initial inventory
+                const initialInventory = {};
+                materials.forEach(mat => {
+                    const key = `${mat.thickness}_${mat.color}`;
+                    initialInventory[key] = 50; // Start with 50 sheets each
+                });
+                await set(inventoryRef, initialInventory);
+            }
+        }
+
+        initializeInventory();
 
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -425,6 +588,8 @@
 
             if (tab === 'cutter') {
                 loadRequests();
+            } else if (tab === 'inventory') {
+                loadInventory();
             }
         };
 
@@ -444,20 +609,6 @@
             event.target.classList.add('active');
         };
 
-        window.handleImageSelect = function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                selectedImage = file;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('imagePreview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
         window.submitRequest = async function() {
             const length = document.getElementById('length').value;
             const width = document.getElementById('width').value;
@@ -474,14 +625,6 @@
             btn.textContent = 'Submitting...';
 
             try {
-                let imageUrl = null;
-                if (selectedImage) {
-                    const filename = `cut-images/${Date.now()}.jpg`;
-                    const imageRef = storageRef(storage, filename);
-                    await uploadBytes(imageRef, selectedImage);
-                    imageUrl = await getDownloadURL(imageRef);
-                }
-
                 const requestsRef = ref(database, 'cutRequests');
                 const newRequestRef = push(requestsRef);
                 
@@ -492,7 +635,6 @@
                     width: parseFloat(width),
                     quantity: parseInt(quantity),
                     description: description,
-                    imageUrl: imageUrl,
                     status: 'pending',
                     timestamp: Date.now()
                 });
@@ -504,8 +646,6 @@
                 document.getElementById('width').value = '';
                 document.getElementById('quantity').value = '1';
                 document.getElementById('description').value = '';
-                document.getElementById('imagePreview').style.display = 'none';
-                selectedImage = null;
                 
             } catch (error) {
                 alert('Error submitting request: ' + error.message);
@@ -595,10 +735,6 @@
                         </div>
                     ` : ''}
 
-                    ${request.imageUrl ? `
-                        <img src="${request.imageUrl}" class="attached-image" alt="Cut reference">
-                    ` : ''}
-
                     <div class="action-buttons">
                         ${request.status === 'pending' ? `
                             <button class="btn-action btn-start" onclick="updateStatus('${request.id}', 'in-progress')">
@@ -606,7 +742,7 @@
                             </button>
                         ` : ''}
                         ${request.status === 'in-progress' ? `
-                            <button class="btn-action btn-complete" onclick="updateStatus('${request.id}', 'completed')">
+                            <button class="btn-action btn-complete" onclick="completeRequest('${request.id}', '${request.thickness}', '${request.color}', ${request.quantity})">
                                 Mark Complete
                             </button>
                         ` : ''}
@@ -616,17 +752,113 @@
         }
 
         window.updateStatus = async function(requestId, newStatus) {
-            if (newStatus === 'completed') {
-                if (!confirm('Mark this cut as complete?')) {
-                    return;
-                }
-            }
-
             try {
                 const requestRef = ref(database, `cutRequests/${requestId}`);
                 await update(requestRef, { status: newStatus });
             } catch (error) {
                 alert('Error updating status: ' + error.message);
+            }
+        };
+
+        window.completeRequest = async function(requestId, thickness, color, quantity) {
+            if (!confirm('Mark this cut as complete? This will deduct sheets from inventory.')) {
+                return;
+            }
+
+            try {
+                // Update request status
+                const requestRef = ref(database, `cutRequests/${requestId}`);
+                await update(requestRef, { status: 'completed' });
+
+                // Deduct from inventory
+                const materialKey = `${thickness}_${color}`;
+                const inventoryRef = ref(database, `inventory/${materialKey}`);
+                const snapshot = await get(inventoryRef);
+                const currentStock = snapshot.val() || 0;
+                const newStock = Math.max(0, currentStock - quantity);
+                
+                await set(inventoryRef, newStock);
+
+                if (newStock <= LOW_STOCK_THRESHOLD) {
+                    alert(`⚠️ Low stock alert: ${thickness} ${color} is now at ${newStock} sheets!`);
+                }
+            } catch (error) {
+                alert('Error completing request: ' + error.message);
+            }
+        };
+
+        function loadInventory() {
+            const inventoryRef = ref(database, 'inventory');
+            onValue(inventoryRef, (snapshot) => {
+                inventory = snapshot.val() || {};
+                renderInventory();
+            });
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventory-grid');
+            
+            const html = materials.map(mat => {
+                const key = `${mat.thickness}_${mat.color}`;
+                const count = inventory[key] || 0;
+                const isLow = count <= LOW_STOCK_THRESHOLD;
+
+                return `
+                    <div class="inventory-card ${isLow ? 'low-stock' : ''}">
+                        <div class="inventory-header">
+                            <div class="inventory-title">${mat.thickness}<br>${mat.color}</div>
+                        </div>
+                        ${isLow ? '<div class="alert">⚠️ LOW STOCK</div>' : ''}
+                        <div class="stock-count ${isLow ? 'low' : ''}">${count}</div>
+                        <div class="stock-label">sheets available</div>
+                        <div class="inventory-actions">
+                            <button class="btn-small btn-add" onclick="openAdjustModal('${key}', '${mat.thickness}', '${mat.color}')">
+                                + Adjust
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        window.openAdjustModal = function(key, thickness, color) {
+            currentAdjustMaterial = key;
+            document.getElementById('modalMaterialName').textContent = `${thickness} ${color}`;
+            document.getElementById('adjustQuantity').value = 1;
+            document.getElementById('adjustModal').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('adjustModal').classList.remove('active');
+            currentAdjustMaterial = null;
+        };
+
+        window.confirmAdjustment = async function(action) {
+            const quantity = parseInt(document.getElementById('adjustQuantity').value);
+            
+            if (!quantity || quantity < 1) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+
+            try {
+                const inventoryRef = ref(database, `inventory/${currentAdjustMaterial}`);
+                const snapshot = await get(inventoryRef);
+                const currentStock = snapshot.val() || 0;
+                
+                let newStock;
+                if (action === 'add') {
+                    newStock = currentStock + quantity;
+                } else {
+                    newStock = Math.max(0, currentStock - quantity);
+                }
+                
+                await set(inventoryRef, newStock);
+                closeModal();
+            } catch (error) {
+                alert('Error adjusting inventory: ' + error.message);
             }
         };
 
