@@ -446,6 +446,17 @@
             <h1>Submit Cut Request</h1>
             
             <div class="form-group">
+                <label>Department</label>
+                <select id="department">
+                    <option value="Roofing">Roofing</option>
+                    <option value="Flooring">Flooring</option>
+                    <option value="Plumbing">Plumbing</option>
+                    <option value="Siding">Siding</option>
+                    <option value="Fascia">Fascia</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
                 <label>Thickness</label>
                 <div class="button-group">
                     <button class="option-btn active" onclick="selectThickness('1/8&quot;')">1/8"</button>
@@ -479,8 +490,13 @@
             </div>
 
             <div class="form-group">
-                <label>Description (Optional)</label>
-                <textarea id="description" placeholder="Add notes or special instructions"></textarea>
+                <label>Custom Cuts (Optional)</label>
+                <textarea id="customCuts" placeholder="Describe any special cuts, angles, or custom shapes needed"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Additional Notes (Optional)</label>
+                <textarea id="description" placeholder="Add any other notes or special instructions"></textarea>
             </div>
 
             <button class="btn btn-primary" onclick="submitRequest()">Submit Request</button>
@@ -623,9 +639,11 @@
         };
 
         window.submitRequest = async function() {
+            const department = document.getElementById('department').value;
             const length = document.getElementById('length').value;
             const width = document.getElementById('width').value;
             const quantity = document.getElementById('quantity').value;
+            const customCuts = document.getElementById('customCuts').value;
             const description = document.getElementById('description').value;
 
             if (!length || !width) {
@@ -642,11 +660,13 @@
                 const newRequestRef = push(requestsRef);
                 
                 await set(newRequestRef, {
+                    department: department,
                     thickness: selectedThickness,
                     color: selectedColor,
                     length: parseFloat(length),
                     width: parseFloat(width),
                     quantity: parseInt(quantity),
+                    customCuts: customCuts,
                     description: description,
                     status: 'pending',
                     timestamp: Date.now()
@@ -655,9 +675,11 @@
                 alert('✅ Cut request submitted successfully!');
                 
                 // Reset form
+                document.getElementById('department').selectedIndex = 0;
                 document.getElementById('length').value = '';
                 document.getElementById('width').value = '';
                 document.getElementById('quantity').value = '1';
+                document.getElementById('customCuts').value = '';
                 document.getElementById('description').value = '';
                 
             } catch (error) {
@@ -720,6 +742,10 @@
                     
                     <div class="details-grid">
                         <div class="detail-item">
+                            <span class="detail-label">Department:</span>
+                            <span class="detail-value">${request.department || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
                             <span class="detail-label">Thickness:</span>
                             <span class="detail-value">${request.thickness}</span>
                         </div>
@@ -740,6 +766,13 @@
                             <span class="detail-value">${request.quantity}</span>
                         </div>
                     </div>
+
+                    ${request.customCuts ? `
+                        <div class="description-box">
+                            <div class="description-label">Custom Cuts:</div>
+                            <div class="description-text">${request.customCuts}</div>
+                        </div>
+                    ` : ''}
 
                     ${request.description ? `
                         <div class="description-box">
