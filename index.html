@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cut Request App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #007AFF;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .option-btn.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #34C759;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #2da94b;
+        }
+
+        .btn-primary:disabled {
+            background: #9DD9A8;
+            cursor: not-allowed;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .filter-btn.active {
+            background: #007AFF;
+            color: white;
+        }
+
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .request-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .status-pending { background: #FF9500; }
+        .status-in-progress { background: #007AFF; }
+        .status-completed { background: #34C759; }
+
+        .timestamp {
+            font-size: 12px;
+            color: #8E8E93;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .description-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .description-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .description-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .attached-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-start {
+            background: #007AFF;
+        }
+
+        .btn-complete {
+            background: #34C759;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8E8E93;
+            font-size: 16px;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .image-upload-btn {
+            background: #007AFF;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .image-upload-btn:hover {
+            background: #0066CC;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('requester')">📝 New Request</button>
+            <button class="tab" onclick="switchTab('cutter')">📋 Cut Queue</button>
+        </div>
+
+        <!-- Requester Tab -->
+        <div id="requester" class="tab-content active">
+            <h1>Submit Cut Request</h1>
+            
+            <div class="form-group">
+                <label>Thickness</label>
+                <div class="button-group">
+                    <button class="option-btn active" onclick="selectThickness('1/8&quot;')">1/8"</button>
+                    <button class="option-btn" onclick="selectThickness('3/8&quot;')">3/8"</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Color</label>
+                <div class="button-group">
+                    <button class="option-btn active" onclick="selectColor('Black Satin')">Black Satin</button>
+                    <button class="option-btn" onclick="selectColor('Shay Gray')">Shay Gray</button>
+                    <button class="option-btn" onclick="selectColor('Antelope')">Antelope</button>
+                    <button class="option-btn" onclick="selectColor('Crescent White')">Crescent White</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Length (inches)</label>
+                <input type="number" id="length" step="0.125" placeholder="Enter length">
+            </div>
+
+            <div class="form-group">
+                <label>Width (inches)</label>
+                <input type="number" id="width" step="0.125" placeholder="Enter width">
+            </div>
+
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="quantity" value="1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label>Description (Optional)</label>
+                <textarea id="description" placeholder="Add notes or special instructions"></textarea>
+            </div>
+
+            <div class="form-group">
+                <input type="file" id="imageInput" accept="image/*" capture="environment" onchange="handleImageSelect(event)">
+                <button class="image-upload-btn" onclick="document.getElementById('imageInput').click()">
+                    📷 Add Photo (Optional)
+                </button>
+                <img id="imagePreview" class="image-preview" style="display: none;">
+            </div>
+
+            <button class="btn btn-primary" onclick="submitRequest()">Submit Request</button>
+        </div>
+
+        <!-- Cutter Tab -->
+        <div id="cutter" class="tab-content">
+            <h1>Cut Queue</h1>
+            
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="setFilter('pending')">Pending (<span id="pending-count">0</span>)</button>
+                <button class="filter-btn" onclick="setFilter('in-progress')">In Progress (<span id="in-progress-count">0</span>)</button>
+                <button class="filter-btn" onclick="setFilter('completed')">Completed (<span id="completed-count">0</span>)</button>
+            </div>
+
+            <div id="requests-list" class="requests-list">
+                <div class="empty-state">Loading requests...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, push, set, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtRfTmK88Sd8QCggQixk728TndsAPiy_U",
+            authDomain: "firewater-e4713.firebaseapp.com",
+            databaseURL: "https://firewater-e4713-default-rtdb.firebaseio.com",
+            projectId: "firewater-e4713",
+            storageBucket: "firewater-e4713.firebasestorage.app",
+            messagingSenderId: "1002990552386",
+            appId: "1:1002990552386:web:92e255584a7b74e137b4db"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
+
+        // Global state
+        let selectedThickness = '1/8"';
+        let selectedColor = 'Black Satin';
+        let selectedImage = null;
+        let currentFilter = 'pending';
+        let allRequests = [];
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+
+            if (tab === 'cutter') {
+                loadRequests();
+            }
+        };
+
+        window.selectThickness = function(thickness) {
+            selectedThickness = thickness;
+            document.querySelectorAll('.form-group:first-of-type .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        };
+
+        window.selectColor = function(color) {
+            selectedColor = color;
+            document.querySelectorAll('.form-group:nth-of-type(2) .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        };
+
+        window.handleImageSelect = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedImage = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.submitRequest = async function() {
+            const length = document.getElementById('length').value;
+            const width = document.getElementById('width').value;
+            const quantity = document.getElementById('quantity').value;
+            const description = document.getElementById('description').value;
+
+            if (!length || !width) {
+                alert('Please enter length and width');
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            try {
+                let imageUrl = null;
+                if (selectedImage) {
+                    const filename = `cut-images/${Date.now()}.jpg`;
+                    const imageRef = storageRef(storage, filename);
+                    await uploadBytes(imageRef, selectedImage);
+                    imageUrl = await getDownloadURL(imageRef);
+                }
+
+                const requestsRef = ref(database, 'cutRequests');
+                const newRequestRef = push(requestsRef);
+                
+                await set(newRequestRef, {
+                    thickness: selectedThickness,
+                    color: selectedColor,
+                    length: parseFloat(length),
+                    width: parseFloat(width),
+                    quantity: parseInt(quantity),
+                    description: description,
+                    imageUrl: imageUrl,
+                    status: 'pending',
+                    timestamp: Date.now()
+                });
+
+                alert('✅ Cut request submitted successfully!');
+                
+                // Reset form
+                document.getElementById('length').value = '';
+                document.getElementById('width').value = '';
+                document.getElementById('quantity').value = '1';
+                document.getElementById('description').value = '';
+                document.getElementById('imagePreview').style.display = 'none';
+                selectedImage = null;
+                
+            } catch (error) {
+                alert('Error submitting request: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit Request';
+            }
+        };
+
+        window.setFilter = function(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderRequests();
+        };
+
+        function loadRequests() {
+            const requestsRef = ref(database, 'cutRequests');
+            onValue(requestsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    allRequests = Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    }));
+                    allRequests.sort((a, b) => b.timestamp - a.timestamp);
+                } else {
+                    allRequests = [];
+                }
+                updateCounts();
+                renderRequests();
+            });
+        }
+
+        function updateCounts() {
+            document.getElementById('pending-count').textContent = 
+                allRequests.filter(r => r.status === 'pending').length;
+            document.getElementById('in-progress-count').textContent = 
+                allRequests.filter(r => r.status === 'in-progress').length;
+            document.getElementById('completed-count').textContent = 
+                allRequests.filter(r => r.status === 'completed').length;
+        }
+
+        function renderRequests() {
+            const filteredRequests = allRequests.filter(r => r.status === currentFilter);
+            const listContainer = document.getElementById('requests-list');
+
+            if (filteredRequests.length === 0) {
+                listContainer.innerHTML = `<div class="empty-state">No ${currentFilter} requests</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = filteredRequests.map(request => `
+                <div class="request-card">
+                    <div class="card-header">
+                        <span class="status-badge status-${request.status}">${request.status.toUpperCase()}</span>
+                        <span class="timestamp">${formatTimestamp(request.timestamp)}</span>
+                    </div>
+                    
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Thickness:</span>
+                            <span class="detail-value">${request.thickness}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Color:</span>
+                            <span class="detail-value">${request.color}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Length:</span>
+                            <span class="detail-value">${request.length}"</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Width:</span>
+                            <span class="detail-value">${request.width}"</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quantity:</span>
+                            <span class="detail-value">${request.quantity}</span>
+                        </div>
+                    </div>
+
+                    ${request.description ? `
+                        <div class="description-box">
+                            <div class="description-label">Notes:</div>
+                            <div class="description-text">${request.description}</div>
+                        </div>
+                    ` : ''}
+
+                    ${request.imageUrl ? `
+                        <img src="${request.imageUrl}" class="attached-image" alt="Cut reference">
+                    ` : ''}
+
+                    <div class="action-buttons">
+                        ${request.status === 'pending' ? `
+                            <button class="btn-action btn-start" onclick="updateStatus('${request.id}', 'in-progress')">
+                                Start Cut
+                            </button>
+                        ` : ''}
+                        ${request.status === 'in-progress' ? `
+                            <button class="btn-action btn-complete" onclick="updateStatus('${request.id}', 'completed')">
+                                Mark Complete
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.updateStatus = async function(requestId, newStatus) {
+            if (newStatus === 'completed') {
+                if (!confirm('Mark this cut as complete?')) {
+                    return;
+                }
+            }
+
+            try {
+                const requestRef = ref(database, `cutRequests/${requestId}`);
+                await update(requestRef, { status: newStatus });
+            } catch (error) {
+                alert('Error updating status: ' + error.message);
+            }
+        };
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} min ago`;
+            if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hr ago`;
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Initial load
+        loadRequests();
+    </script>
+</body>
+</html>
