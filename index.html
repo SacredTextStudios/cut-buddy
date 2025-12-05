@@ -575,6 +575,7 @@
         let currentAdjustMaterial = null;
 
         const LOW_STOCK_THRESHOLD = 10;
+        const NTFY_TOPIC = 'cutbuddy_sacredtext_2024'; // Your unique notification topic
 
         // Material combinations
         const materials = [
@@ -655,6 +656,21 @@
                     status: 'pending',
                     timestamp: Date.now()
                 });
+
+                // Send notification
+                try {
+                    await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+                        method: 'POST',
+                        headers: {
+                            'Title': 'New Cut Request',
+                            'Priority': 'high',
+                            'Tags': 'scissors'
+                        },
+                        body: `${department}: ${thickness} ${color}\n${length}" x ${width}" (Qty: ${quantity})`
+                    });
+                } catch (e) {
+                    console.log('Notification failed:', e);
+                }
 
                 alert('✅ Cut request submitted successfully!');
                 
