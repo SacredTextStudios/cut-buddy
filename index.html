@@ -458,20 +458,20 @@
             
             <div class="form-group">
                 <label>Thickness</label>
-                <div class="button-group">
-                    <button class="option-btn active" onclick="selectThickness('1/8&quot;')">1/8"</button>
-                    <button class="option-btn" onclick="selectThickness('3/8&quot;')">3/8"</button>
-                </div>
+                <select id="thickness">
+                    <option value='1/8"'>1/8"</option>
+                    <option value='3/8"'>3/8"</option>
+                </select>
             </div>
 
             <div class="form-group">
                 <label>Color</label>
-                <div class="button-group">
-                    <button class="option-btn active" onclick="selectColor('Black Satin')">Black Satin</button>
-                    <button class="option-btn" onclick="selectColor('Shay Gray')">Shay Gray</button>
-                    <button class="option-btn" onclick="selectColor('Antelope')">Antelope</button>
-                    <button class="option-btn" onclick="selectColor('Crescent White')">Crescent White</button>
-                </div>
+                <select id="color">
+                    <option value="Black Satin">Black Satin</option>
+                    <option value="Shay Gray">Shay Gray</option>
+                    <option value="Antelope">Antelope</option>
+                    <option value="Crescent White">Crescent White</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -569,8 +569,6 @@
         const database = getDatabase(app);
 
         // Global state
-        let selectedThickness = '1/8"';
-        let selectedColor = 'Black Satin';
         let currentFilter = 'pending';
         let allRequests = [];
         let inventory = {};
@@ -622,24 +620,10 @@
             }
         };
 
-        window.selectThickness = function(thickness) {
-            selectedThickness = thickness;
-            document.querySelectorAll('.form-group:first-of-type .option-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-        };
-
-        window.selectColor = function(color) {
-            selectedColor = color;
-            document.querySelectorAll('.form-group:nth-of-type(2) .option-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-        };
-
         window.submitRequest = async function() {
             const department = document.getElementById('department').value;
+            const thickness = document.getElementById('thickness').value;
+            const color = document.getElementById('color').value;
             const length = document.getElementById('length').value;
             const width = document.getElementById('width').value;
             const quantity = document.getElementById('quantity').value;
@@ -661,8 +645,8 @@
                 
                 await set(newRequestRef, {
                     department: department,
-                    thickness: selectedThickness,
-                    color: selectedColor,
+                    thickness: thickness,
+                    color: color,
                     length: parseFloat(length),
                     width: parseFloat(width),
                     quantity: parseInt(quantity),
@@ -676,6 +660,8 @@
                 
                 // Reset form
                 document.getElementById('department').selectedIndex = 0;
+                document.getElementById('thickness').selectedIndex = 0;
+                document.getElementById('color').selectedIndex = 0;
                 document.getElementById('length').value = '';
                 document.getElementById('width').value = '';
                 document.getElementById('quantity').value = '1';
